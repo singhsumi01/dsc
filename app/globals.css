@@ -6,16 +6,16 @@
   
   --animate-fade-in-up: fade-in-up 0.5s ease-out forwards;
   --animate-slow-spin: spin 8s linear infinite;
+  --animate-stagger-fade: stagger-fade 0.4s ease-out forwards;
 
   @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes stagger-fade {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 }
 
@@ -52,4 +52,20 @@ body {
 
 .btn-secondary {
   @apply bg-white text-gray-900 border border-gray-100 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition-all active:scale-95 shadow-sm;
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: stagger-fade 0.4s ease-out forwards;
+}
+
+.pulse-glow {
+  box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
 }

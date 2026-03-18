@@ -122,8 +122,12 @@ export default function UserManagementPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {users.map((row) => (
-                  <tr key={row.UserID} className="group hover:bg-gray-50/50 transition-colors">
+                {users.map((row, idx) => (
+                  <tr 
+                    key={row.UserID} 
+                    className="group hover:bg-gray-50/50 transition-colors stagger-item"
+                    style={{ animationDelay: `${idx * 0.05}s` }}
+                  >
                     <td className="py-8">
                        <div className="flex items-center">
                           <div className="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-sm mr-4 shadow-sm">

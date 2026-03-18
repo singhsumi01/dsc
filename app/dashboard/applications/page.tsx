@@ -99,8 +99,12 @@ export default function ApplicationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filteredApps.map((app) => (
-                  <tr key={app.ApplicationID} className="group hover:bg-gray-50/50 transition-colors">
+                {filteredApps.map((app, idx) => (
+                  <tr 
+                    key={app.ApplicationID} 
+                    className="group hover:bg-gray-50/50 transition-colors stagger-item"
+                    style={{ animationDelay: `${idx * 0.05}s` }}
+                  >
                     <td className="py-8">
                        <p className="font-extrabold text-gray-900 tracking-tight leading-none mb-1">{app.ApplicationID}</p>
                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{app.FullName}</p>

@@ -141,8 +141,12 @@ export default function AdminSettingsPage() {
           {loading ? (
             <><Skeleton className="h-48 w-full"/><Skeleton className="h-48 w-full"/><Skeleton className="h-48 w-full"/></>
           ) : (
-            categories.map(cat => (
-              <div key={cat.CategoryID} className="card-premium p-8 group">
+            categories.map((cat, idx) => (
+              <div 
+                key={cat.CategoryID} 
+                className="card-premium p-8 group stagger-item"
+                style={{ animationDelay: `${idx * 0.1}s` }}
+              >
                 <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-150 transition-transform duration-1000">
                    <FileBadge className="h-32 w-32" />
                 </div>
@@ -185,8 +189,12 @@ export default function AdminSettingsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {pricing.map(p => (
-                      <tr key={p.PricingID} className="group hover:bg-gray-50/50 transition-colors">
+                    {pricing.map((p, idx) => (
+                      <tr 
+                        key={p.PricingID} 
+                        className="group hover:bg-gray-50/50 transition-colors stagger-item"
+                        style={{ animationDelay: `${idx * 0.05}s` }}
+                      >
                         <td className="py-6 font-black text-gray-900">{p.Category}</td>
                         <td className="py-6">
                            <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest ring-1 ring-indigo-100">

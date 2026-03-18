@@ -175,11 +175,12 @@ export default function NewApplicationPage() {
                   <button
                     key={cat.CategoryName}
                     onClick={() => selectCategory(cat.CategoryName)}
-                    className={`relative p-8 text-left rounded-[2rem] border-2 transition-all duration-300 overflow-hidden group ${
+                    className={`relative p-8 text-left rounded-[2rem] border-2 transition-all duration-300 overflow-hidden group stagger-item ${
                       formData.dscType === cat.CategoryName 
                         ? 'border-indigo-600 bg-indigo-50/20 ring-4 ring-indigo-50 shadow-2xl' 
                         : 'border-gray-50 bg-gray-50/50 hover:bg-white hover:border-gray-200'
                     }`}
+                    style={{ animationDelay: `${categories.indexOf(cat) * 0.1}s` }}
                   >
                     <div className={`absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-12 -mt-12 transition-transform duration-700 ${formData.dscType === cat.CategoryName ? 'scale-150' : 'group-hover:scale-125'}`}></div>
                     <FileBadge className={`h-10 w-10 mb-6 transition-all duration-300 ${formData.dscType === cat.CategoryName ? 'text-indigo-600 scale-110' : 'text-gray-400'}`} />
@@ -204,11 +205,12 @@ export default function NewApplicationPage() {
                     <button
                       key={plan.TierName}
                       onClick={() => selectPlan(plan.TierName)}
-                      className={`relative p-6 rounded-2xl border-2 transition-all duration-300 group ${
+                      className={`relative p-6 rounded-2xl border-2 transition-all duration-300 group stagger-item ${
                         formData.planTier === plan.TierName 
                           ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl shadow-indigo-100' 
                           : 'border-gray-50 bg-white text-gray-500 hover:border-indigo-200'
                       }`}
+                      style={{ animationDelay: `${pricing.indexOf(plan) * 0.1}s` }}
                     >
                       <p className={`text-base font-black ${formData.planTier === plan.TierName ? 'text-white' : 'text-gray-900'}`}>{plan.TierName}</p>
                       <p className={`text-lg font-black mt-1 ${formData.planTier === plan.TierName ? 'text-indigo-100' : 'text-indigo-600'}`}>₹{plan.Price}</p>
@@ -332,7 +334,7 @@ export default function NewApplicationPage() {
           {currentStep < 4 ? (
             <button
               onClick={handleNext}
-              className="btn-primary flex items-center h-14"
+              className={`btn-primary flex items-center h-14 ${formData.dscType && (currentStep > 1 || formData.planTier) ? 'pulse-glow' : ''}`}
             >
               Continue
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
