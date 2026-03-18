@@ -158,8 +158,8 @@ export default function NewApplicationPage() {
         {currentStep === 1 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div>
-              <h2 className="text-3xl font-black text-gray-900 tracking-tight leading-none mb-2">Service Configuration</h2>
-              <p className="text-gray-500 font-medium italic">Select your preferred DSC category and validity plan.</p>
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight leading-none mb-2">Paperless Service Selection</h2>
+              <p className="text-gray-500 font-medium italic">Industry-standard Class 3, DGFT, and Signer certificates.</p>
             </div>
 
             {loadingData ? (
