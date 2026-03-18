@@ -11,10 +11,9 @@ export async function apiRequest(action: string, data: any = {}, token: string |
 
   const response = await fetch(API_BASE_URL, {
     method: 'POST',
-    mode: 'cors',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    // We omit Content-Type: application/json to avoid CORS preflight (OPTIONS) 
+    // which Google Apps Script web apps do not support. 
+    // GAS will still receive the body string in e.postData.contents.
     body: JSON.stringify({
       action,
       data,
