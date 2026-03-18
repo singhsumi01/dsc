@@ -10,19 +10,19 @@ export default function Hero() {
             <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 mb-6">
               Production Ready SaaS
             </span>
-            <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 font-display leading-[1.1]">
+            <h1 className="text-6xl lg:text-8xl font-black text-gray-900 mb-8 font-display leading-[1.05] tracking-tighter animate-fade-in-up">
               Scale your DSC <span className="text-indigo-600 block">Registration Agency.</span>
             </h1>
             <p className="text-xl text-gray-600 mb-10 max-w-2xl leading-relaxed">
               The complete platform for Agents and Clients to manage Digital Signature Certificates. 
               Automated workflows, secure document storage, and seamless payments.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link href="/signup" className="btn-primary flex items-center justify-center text-lg px-8 py-4">
-                Start 14-day free trial
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <Link href="/signup" className="btn-primary flex items-center justify-center text-lg px-8 py-5 pulse-glow">
+                Start Today Free
                 <Zap className="ml-2 h-5 w-5 fill-white" />
               </Link>
-              <Link href="/#pricing" className="btn-secondary flex items-center justify-center text-lg px-8 py-4">
+              <Link href="/#pricing" className="btn-secondary flex items-center justify-center text-lg px-8 py-5">
                 View Pricing
               </Link>
             </div>

@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @font-face {
     font-family: "Geologica ExtraLight";
     src: url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.eot");
@@ -21,7 +23,7 @@
 @theme {
   --font-sans: "Geologica", "Inter", sans-serif;
   --font-display: "Geologica ExtraLight", "Outfit", sans-serif;
-  
+
   --animate-fade-in-up: fade-in-up 0.5s ease-out forwards;
   --animate-slow-spin: spin 8s linear infinite;
   --animate-stagger-fade: stagger-fade 0.4s ease-out forwards;
