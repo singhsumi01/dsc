@@ -18,27 +18,31 @@ import { useAuthStore } from '@/lib/store';
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const appId = searchParams.get('appId');
+  const amount = searchParams.get('amount') || '4,999';
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const token = useAuthStore(state => state.token);
 
   const handlePayment = async (gateway: 'Razorpay' | 'PayU') => {
     setLoading(true);
-    // Simulate payment gateway initialization
-    setTimeout(async () => {
-      try {
-        // In real integration, we'd trigger the Rpay SDK here.
-        // For now, we simulate a successful payment trigger to our GAS webhook.
-        alert(`Redirecting to ${gateway} secure terminal...`);
-        
-        // Mock successful payment redirect back to dashboard
-        router.push(`/dashboard/applications?status=paid&id=${appId}`);
-      } catch (err) {
-        alert('Payment failed');
-      } finally {
-        setLoading(false);
-      }
-    }, 1500);
+    try {
+      // In real integration, we'd trigger the Rpay SDK here.
+      // For now, we simulate a successful payment trigger to our GAS webhook.
+      alert(`Redirecting to ${gateway} secure terminal...`);
+      
+      // Update status to 'Paid' in GAS
+      await apiRequest('application/updateStatus', { 
+        applicationId: appId, 
+        newStatus: 'Paid',
+        notes: `Paid via ${gateway}`
+      }, token);
+
+      router.push(`/dashboard/applications?status=paid&id=${appId}`);
+    } catch (err) {
+      alert('Payment processing failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,7 +60,7 @@ export default function CheckoutPage() {
           <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-50">
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Total Amount</p>
-              <p className="text-4xl font-extrabold text-gray-900">₹4,999</p>
+              <p className="text-4xl font-extrabold text-gray-900">₹{amount}</p>
             </div>
             <div className="text-right">
               <span className="px-4 py-2 bg-green-50 text-green-600 rounded-full text-xs font-bold ring-1 ring-green-100">

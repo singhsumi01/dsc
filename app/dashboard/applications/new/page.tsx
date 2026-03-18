@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ArrowRight, 
@@ -32,6 +32,7 @@ export default function NewApplicationPage() {
   const [formData, setFormData] = useState<any>({
     dscType: '',
     planTier: '',
+    price: 0,
     fullName: '',
     email: '',
     phone: '',
@@ -41,20 +42,50 @@ export default function NewApplicationPage() {
     photoFile: null
   });
 
+  const [categories, setCategories] = useState<any[]>([]);
+  const [pricing, setPricing] = useState<any[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
   const router = useRouter();
   const token = useAuthStore(state => state.token);
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [catRes, priceRes] = await Promise.all([
+          apiRequest('categories/list', {}, token),
+          apiRequest('pricing/list', {}, token)
+        ]);
+        setCategories(catRes.data || []);
+        setPricing(priceRes.data || []);
+      } catch (err) {
+        console.error('Failed to fetch categories/pricing', err);
+      } finally {
+        setLoadingData(false);
+      }
+    }
+    if (token) fetchData();
+  }, [token]);
+
   const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, 4));
   const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const selectCategory = (type: string) => {
+    setFormData({ ...formData, dscType: type });
+  };
+
+  const selectPlan = (tier: string) => {
+    const selectedPrice = pricing.find(p => p.TierName === tier && p.Category === formData.dscType)?.Price || 0;
+    setFormData({ ...formData, planTier: tier, price: selectedPrice });
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const res = await apiRequest('application/create', formData, token);
-      // In real app, redirect to payment
-      router.push(`/dashboard/payments/checkout?appId=${res.applicationId}`);
+      router.push(`/dashboard/payments/checkout?appId=${res.applicationId}&amount=${formData.price}`);
     } catch (err) {
-      alert('Failed to create application');
+      alert('Failed to create application. Check network.');
     } finally {
       setLoading(false);
     }
@@ -93,38 +124,47 @@ export default function NewApplicationPage() {
         {currentStep === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h2 className="text-2xl font-bold font-display text-gray-900">Which DSC do you need?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {['Class 3 Individual', 'Class 3 Organization', 'DGFT', 'Document Signer'].map(type => (
-                <button
-                  key={type}
-                  onClick={() => setFormData({ ...formData, dscType: type })}
-                  className={`p-6 text-left rounded-2xl border-2 transition-all group ${
-                    formData.dscType === type ? 'border-indigo-600 bg-indigo-50/30' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'
-                  }`}
-                >
-                  <FileBadge className={`h-8 w-8 mb-4 transition-colors ${formData.dscType === type ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-400'}`} />
-                  <p className="font-bold text-gray-900">{type}</p>
-                  <p className="text-xs text-gray-500 mt-1 font-medium">Verified by authorized certifying authorities.</p>
-                </button>
-              ))}
-            </div>
-            
-            <div className="pt-8">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Choose a Plan</h3>
-              <div className="flex gap-4">
-                {['Basic', 'Pro', 'Enterprise'].map(tier => (
-                  <button
-                    key={tier}
-                    onClick={() => setFormData({ ...formData, planTier: tier })}
-                    className={`flex-1 py-4 px-6 rounded-xl font-bold text-sm transition-all border-2 ${
-                      formData.planTier === tier ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'border-gray-50 text-gray-500'
-                    }`}
-                  >
-                    {tier}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {loadingData ? (
+              <div className="py-20 text-center animate-pulse text-gray-400 font-bold tracking-widest italic uppercase">Fetching available categories...</div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.CategoryName}
+                      onClick={() => selectCategory(cat.CategoryName)}
+                      className={`p-6 text-left rounded-2xl border-2 transition-all group ${
+                        formData.dscType === cat.CategoryName ? 'border-indigo-600 bg-indigo-50/30' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'
+                      }`}
+                    >
+                      <FileBadge className={`h-8 w-8 mb-4 transition-colors ${formData.dscType === cat.CategoryName ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-400'}`} />
+                      <p className="font-bold text-gray-900">{cat.CategoryName}</p>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">{cat.Description}</p>
+                    </button>
+                  ))}
+                </div>
+                
+                {formData.dscType && (
+                  <div className="pt-8 animate-in fade-in slide-in-from-top-2">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Choose a Plan</h3>
+                    <div className="flex gap-4">
+                      {pricing.filter(p => p.Category === formData.dscType).map(plan => (
+                        <button
+                          key={plan.TierName}
+                          onClick={() => selectPlan(plan.TierName)}
+                          className={`flex-1 py-4 px-6 rounded-xl font-bold text-sm transition-all border-2 ${
+                            formData.planTier === plan.TierName ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'border-gray-50 text-gray-500'
+                          }`}
+                        >
+                          <p>{plan.TierName}</p>
+                          <p className="text-[10px] mt-1 text-gray-400 italic">₹{plan.Price}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -207,7 +247,8 @@ export default function NewApplicationPage() {
           {currentStep < 4 ? (
             <button
               onClick={handleNext}
-              className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold flex items-center shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all group"
+              disabled={currentStep === 1 && !formData.dscType}
+              className={`bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold flex items-center shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all group disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               Continue
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -216,7 +257,7 @@ export default function NewApplicationPage() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="bg-green-600 text-white px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest flex items-center shadow-lg shadow-green-100 hover:bg-green-700 transition-all"
+              className="bg-green-600 text-white px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest flex items-center shadow-lg shadow-green-100 hover:bg-green-700 transition-all disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : 'Confirm & Proceed to Pay'}
             </button>

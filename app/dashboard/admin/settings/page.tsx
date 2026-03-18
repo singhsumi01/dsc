@@ -39,6 +39,43 @@ export default function AdminSettingsPage() {
     if (token) fetchData();
   }, [token]);
 
+  const handleAddCategory = async () => {
+    const name = prompt('Category Name:');
+    const description = prompt('Description:');
+    if (!name) return;
+    try {
+      await apiRequest('admin/addCategory', { name, description }, token);
+      window.location.reload(); // Refresh to see new ID
+    } catch (e) { alert('Failed'); }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm('Delete category?')) return;
+    try {
+      await apiRequest('admin/deleteCategory', { id }, token);
+      setCategories(categories.filter(c => c.CategoryID !== id));
+    } catch (e) { alert('Failed'); }
+  };
+
+  const handleAddPricing = async () => {
+    const category = prompt('Category Name (Must match exactly):');
+    const tierName = prompt('Tier Name (e.g. Basic, Pro):');
+    const price = prompt('Price (Numeric):');
+    if (!category || !tierName || !price) return;
+    try {
+      await apiRequest('admin/addPricing', { category, tierName, price: Number(price) }, token);
+      window.location.reload();
+    } catch (e) { alert('Failed'); }
+  };
+
+  const handleDeletePricing = async (id: string) => {
+    if (!confirm('Delete pricing?')) return;
+    try {
+      await apiRequest('admin/deletePricing', { id }, token);
+      setPricing(pricing.filter(p => p.TierID !== id));
+    } catch (e) { alert('Failed'); }
+  };
+
   return (
     <div className="space-y-12">
       <div>
@@ -56,7 +93,10 @@ export default function AdminSettingsPage() {
               <Layers className="mr-3 h-5 w-5 text-indigo-600" />
               DSC Categories
             </h3>
-            <button className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors">
+            <button 
+              onClick={handleAddCategory}
+              className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+            >
               <PlusCircle className="h-5 w-5" />
             </button>
           </div>
@@ -72,8 +112,12 @@ export default function AdminSettingsPage() {
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none mt-1">Status: Active</p>
                 </div>
                 <div className="flex space-x-2">
-                  <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"><Edit2 className="h-4 w-4" /></button>
-                  <button className="p-2 text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                  <button 
+                    onClick={() => handleDeleteCategory(cat.CategoryID)}
+                    className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -87,7 +131,10 @@ export default function AdminSettingsPage() {
               <Zap className="mr-3 h-5 w-5 text-amber-500" />
               Service Pricing
             </h3>
-            <button className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors">
+            <button 
+              onClick={handleAddPricing}
+              className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors"
+            >
               <PlusCircle className="h-5 w-5" />
             </button>
           </div>
@@ -101,11 +148,15 @@ export default function AdminSettingsPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900">{price.TierName}</h4>
+                    <p className="text-[10px] text-gray-500 font-medium mb-1">{price.Category}</p>
                     <p className="text-lg font-black text-indigo-600">₹{price.Price}</p>
                   </div>
                 </div>
-                <button className="p-2 bg-white rounded-lg shadow-sm border border-gray-100 transition-transform active:scale-95">
-                  <Edit2 className="h-4 w-4 text-gray-400" />
+                <button 
+                  onClick={() => handleDeletePricing(price.TierID)}
+                  className="p-2 bg-white rounded-lg shadow-sm border border-gray-100 hover:text-red-500 transition-all active:scale-95"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             ))}

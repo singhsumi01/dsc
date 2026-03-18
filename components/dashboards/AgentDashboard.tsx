@@ -17,20 +17,25 @@ import { useAuthStore } from '@/lib/store';
 export default function AgentDashboard({ user }: { user: any }) {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any[]>([]);
   const token = useAuthStore(state => state.token);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const res = await apiRequest('dashboard/stats', {}, token);
-        setStats(res.data);
+        const [statsRes, appsRes] = await Promise.all([
+          apiRequest('dashboard/stats', {}, token),
+          apiRequest('application/list', {}, token)
+        ]);
+        setStats(statsRes.data);
+        setApplications(appsRes.data || []);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    fetchStats();
+    if (token) fetchData();
   }, [token]);
 
   return (
@@ -65,8 +70,8 @@ export default function AgentDashboard({ user }: { user: any }) {
         </div>
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
           <Users className="h-8 w-8 text-emerald-600 mb-4" />
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Total Clients</p>
-          <p className="text-2xl font-black text-gray-900">12</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Success Rate</p>
+          <p className="text-2xl font-black text-gray-900">100%</p>
         </div>
       </div>
 
@@ -90,13 +95,23 @@ export default function AgentDashboard({ user }: { user: any }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {[1, 2, 3].map((i) => (
-                <tr key={i} className="hover:bg-gray-50 transition-colors group">
-                  <td className="py-5 pl-4 font-bold text-gray-900">DSC_APP_240318_10{i}</td>
-                  <td className="py-5 text-sm text-gray-600 font-medium">Rahul Sharma</td>
-                  <td className="py-5 text-sm text-gray-500 font-medium italic">Class 3 Ind.</td>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center text-gray-400 italic">Processing data...</td>
+                </tr>
+              ) : applications.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center text-gray-400 italic">No applications found.</td>
+                </tr>
+              ) : applications.map((app) => (
+                <tr key={app.ApplicationID} className="hover:bg-gray-50 transition-colors group">
+                  <td className="py-5 pl-4 font-bold text-gray-900">{app.ApplicationID}</td>
+                  <td className="py-5 text-sm text-gray-600 font-medium">{app.ApplicantName}</td>
+                  <td className="py-5 text-sm text-gray-500 font-medium italic">{app.DSCType}</td>
                   <td className="py-5">
-                    <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold ring-1 ring-amber-100">Pending</span>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 ${
+                      app.ApplicationStatus === 'New' ? 'bg-amber-50 text-amber-600 ring-amber-100' : 'bg-green-50 text-green-600 ring-green-100'
+                    }`}>{app.ApplicationStatus}</span>
                   </td>
                   <td className="py-5 pr-4 text-right">
                     <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors">

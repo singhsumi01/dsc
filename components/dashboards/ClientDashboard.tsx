@@ -18,20 +18,25 @@ import { useAuthStore } from '@/lib/store';
 export default function ClientDashboard({ user }: { user: any }) {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any[]>([]);
   const token = useAuthStore(state => state.token);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const res = await apiRequest('dashboard/stats', {}, token);
-        setStats(res.data);
+        const [statsRes, appsRes] = await Promise.all([
+          apiRequest('dashboard/stats', {}, token),
+          apiRequest('application/list', {}, token)
+        ]);
+        setStats(statsRes.data);
+        setApplications(appsRes.data || []);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    fetchStats();
+    if (token) fetchData();
   }, [token]);
 
   const statCards = [
@@ -87,21 +92,28 @@ export default function ClientDashboard({ user }: { user: any }) {
             </Link>
           </div>
           <div className="space-y-6">
-            {/* Mock recent items */}
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+            {loading ? (
+              <div className="py-10 text-center text-gray-400 font-medium animate-pulse italic">Loading your records...</div>
+            ) : applications.length === 0 ? (
+              <div className="py-10 text-center text-gray-400 font-medium italic">No applications found.</div>
+            ) : applications.slice(0, 5).map((app) => (
+              <div key={app.ApplicationID} className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mr-4">
                     <FileText className="h-6 w-6 text-indigo-600" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900">DSC_APP_240318_00{i}</h4>
-                    <p className="text-xs text-gray-500 font-medium tracking-wide Uppercase mt-0.5">Class 3 Individual • Basic</p>
+                    <h4 className="font-bold text-gray-900">{app.ApplicationID}</h4>
+                    <p className="text-xs text-gray-500 font-medium tracking-wide uppercase mt-0.5">{app.DSCType} • {app.PlanTier}</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-bold ring-1 ring-amber-100">Pending</span>
-                  <span className="text-[10px] text-gray-400 mt-2 font-medium">Updated 2h ago</span>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 ${
+                    app.ApplicationStatus === 'New' ? 'bg-indigo-50 text-indigo-600 ring-indigo-100' :
+                    app.ApplicationStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' :
+                    'bg-amber-50 text-amber-600 ring-amber-100'
+                  }`}>{app.ApplicationStatus}</span>
+                  <span className="text-[10px] text-gray-400 mt-2 font-medium">Updated {new Date(app.UpdatedAt).toLocaleDateString()}</span>
                 </div>
               </div>
             ))}

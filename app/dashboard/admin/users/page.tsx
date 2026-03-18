@@ -42,6 +42,29 @@ export default function UserManagementPage() {
     u.Email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleDelete = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await apiRequest('admin/deleteUser', { targetUserId: userId }, token);
+      setUsers(users.filter(u => u.UserID !== userId));
+    } catch (err) {
+      alert('Delete failed');
+    }
+  };
+
+  const handleUpdateRole = async (userId: string, currentRole: string) => {
+    const roles = ['Client', 'Agent', 'Admin', 'Super Admin'];
+    const newRole = prompt(`Change role from ${currentRole} to:`, currentRole);
+    if (!newRole || !roles.includes(newRole) || newRole === currentRole) return;
+    
+    try {
+      await apiRequest('admin/updateRole', { targetUserId: userId, newRole }, token);
+      setUsers(users.map(u => u.UserID === userId ? { ...u, Role: newRole } : u));
+    } catch (err) {
+      alert('Update failed');
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -131,10 +154,16 @@ export default function UserManagementPage() {
                   </td>
                   <td className="px-8 py-6 text-right">
                     <div className="flex items-center justify-end space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                      <button 
+                        onClick={() => handleUpdateRole(user.UserID, user.Role)}
+                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                      >
                         <Edit2 className="h-4 w-4" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                      <button 
+                        onClick={() => handleDelete(user.UserID)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>

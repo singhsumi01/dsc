@@ -20,20 +20,25 @@ import { useAuthStore } from '@/lib/store';
 export default function AdminDashboard({ user }: { user: any }) {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [logs, setLogs] = useState<any[]>([]);
   const token = useAuthStore(state => state.token);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const res = await apiRequest('dashboard/stats', {}, token);
-        setStats(res.data);
+        const [statsRes, logsRes] = await Promise.all([
+          apiRequest('dashboard/stats', {}, token),
+          apiRequest('admin/logs', {}, token)
+        ]);
+        setStats(statsRes.data);
+        setLogs(logsRes.data || []);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    fetchStats();
+    if (token) fetchData();
   }, [token]);
 
   const adminStats = [
@@ -98,15 +103,15 @@ export default function AdminDashboard({ user }: { user: any }) {
           </Link>
         </div>
         <div className="space-y-4">
-          {[
-            { msg: 'Agent "Sumit Singh" created new application DSC_APP_240318_102', time: '2 mins ago', type: 'info' },
-            { msg: 'Webhook retry successful for Application ID: DSC_APP_240317_441', time: '14 mins ago', type: 'success' },
-            { msg: 'Admin "System" updated Class 3 pricing tier', time: '1 hour ago', type: 'warning' },
-          ].map((log, i) => (
-            <div key={i} className="flex items-center px-4 py-3 rounded-2xl bg-gray-50/50 border border-gray-100">
-              <div className={`w-2 h-2 rounded-full mr-4 ${log.type === 'success' ? 'bg-green-500' : log.type === 'warning' ? 'bg-amber-500' : 'bg-indigo-500'}`}></div>
-              <p className="text-sm text-gray-700 flex-1 font-medium">{log.msg}</p>
-              <span className="text-[10px] text-gray-400 font-bold uppercase">{log.time}</span>
+          {loading ? (
+             <div className="py-4 text-center text-gray-400 italic">Streaming logs...</div>
+          ) : logs.length === 0 ? (
+            <div className="py-4 text-center text-gray-400 italic">No system events logged.</div>
+          ) : logs.slice(0, 5).map((log, i) => (
+            <div key={log.LogID || i} className="flex items-center px-4 py-3 rounded-2xl bg-gray-50/50 border border-gray-100">
+              <div className={`w-2 h-2 rounded-full mr-4 ${log.Type === 'API_ERROR' ? 'bg-red-500' : log.Type === 'INFO' ? 'bg-indigo-500' : 'bg-green-500'}`}></div>
+              <p className="text-sm text-gray-700 flex-1 font-medium">{log.Message}</p>
+              <span className="text-[10px] text-gray-400 font-bold uppercase">{new Date(log.CreatedAt).toLocaleTimeString()}</span>
             </div>
           ))}
         </div>
