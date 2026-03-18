@@ -15,7 +15,8 @@ import {
   FileBadge,
   Check,
   Zap,
-  CreditCard
+  CreditCard,
+  AlertCircle
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/store';
