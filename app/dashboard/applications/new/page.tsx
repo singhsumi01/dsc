@@ -126,7 +126,10 @@ export default function NewApplicationPage() {
   };
 
   const selectPlan = (tier: string) => {
-    const selectedPrice = pricing.find(p => p.TierName === tier && p.Category === formData.dscType)?.Price || 0;
+    const selectedPrice = pricing.find(p => 
+      p.TierName === tier && 
+      p.Category?.trim().toLowerCase() === formData.dscType?.trim().toLowerCase()
+    )?.Price || 0;
     setFormData({ ...formData, planTier: tier, price: selectedPrice });
   };
 
@@ -234,7 +237,7 @@ export default function NewApplicationPage() {
               <div className="pt-12 border-t border-gray-50 animate-in fade-in slide-in-from-top-4 duration-500">
                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-8">Validity & Pricing</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {pricing.filter(p => p.Category === formData.dscType).map(plan => (
+                  {pricing.filter(p => p.Category?.trim().toLowerCase() === formData.dscType?.trim().toLowerCase()).map(plan => (
                     <button
                       key={plan.TierName}
                       onClick={() => selectPlan(plan.TierName)}
@@ -252,6 +255,13 @@ export default function NewApplicationPage() {
                       )}
                     </button>
                   ))}
+                  {pricing.filter(p => p.Category?.trim().toLowerCase() === formData.dscType?.trim().toLowerCase()).length === 0 && (
+                    <div className="col-span-full py-10 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center">
+                      <AlertCircle className="h-8 w-8 text-gray-300 mb-2" />
+                      <p className="text-gray-500 font-medium italic">No pricing plans discovered for this category yet.</p>
+                      <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest mt-1">Contact admin to publish plans</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

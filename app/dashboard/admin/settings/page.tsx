@@ -63,16 +63,25 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [newPlan, setNewPlan] = useState({ category: '', tierName: '', price: '' });
+
   const handleAddPricing = async () => {
-    const category = prompt('Category Target Name:');
-    const tierName = prompt('Pricing Tier Label (e.g. Premium):');
-    const price = prompt('Base Price (Numeric):');
-    if (!category || !tierName || !price) return;
+    if (!newPlan.category || !newPlan.tierName || !newPlan.price) {
+      setToast({ message: 'All fields are required', type: 'error' });
+      return;
+    }
 
     setActionLoading(true);
     try {
-      await apiRequest('admin/addPricing', { category, tierName, price: Number(price) }, token);
+      await apiRequest('admin/addPricing', { 
+        category: newPlan.category, 
+        tierName: newPlan.tierName, 
+        price: Number(newPlan.price) 
+      }, token);
       setToast({ message: 'Pricing Plan Broadcasted', type: 'success' });
+      setIsPricingModalOpen(false);
+      setNewPlan({ category: '', tierName: '', price: '' });
       fetchData();
     } catch (err) {
       setToast({ message: 'Failed to broadcast plan', type: 'error' });
@@ -171,9 +180,83 @@ export default function AdminSettingsPage() {
           icon={CreditCard} 
           title="Pricing Plans" 
           desc="Define validity tiers and unit costs for each DSC category." 
-          onAction={handleAddPricing}
+          onAction={() => {
+            if (categories.length === 0) {
+              setToast({ message: 'Create a category first', type: 'info' });
+              return;
+            }
+            setIsPricingModalOpen(true);
+            setNewPlan({ ...newPlan, category: categories[0].CategoryName });
+          }}
           actionLabel="Create Plan"
         />
+
+        {/* Pricing Modal */}
+        {isPricingModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-gray-900/40 backdrop-blur-sm">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg p-10 animate-fade-in-up">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                  <Plus className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-black text-gray-900 leading-none">New Pricing Plan</h4>
+                  <p className="text-xs text-gray-400 font-medium mt-1">Broadcast a new tier to the application wizard.</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Target Category</label>
+                  <select 
+                    value={newPlan.category}
+                    onChange={e => setNewPlan({...newPlan, category: e.target.value})}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  >
+                    {categories.map(c => <option key={c.CategoryName} value={c.CategoryName}>{c.CategoryName}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Tier Name / Label</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 2 Years Validity"
+                    value={newPlan.tierName}
+                    onChange={e => setNewPlan({...newPlan, tierName: e.target.value})}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Base Price (INR)</label>
+                  <input 
+                    type="number" 
+                    placeholder="999"
+                    value={newPlan.price}
+                    onChange={e => setNewPlan({...newPlan, price: e.target.value})}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 mt-10">
+                <button 
+                  onClick={() => setIsPricingModalOpen(false)}
+                  className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleAddPricing}
+                  disabled={actionLoading}
+                  className="flex-[2] btn-primary h-14 flex items-center justify-center shadow-xl shadow-indigo-100"
+                >
+                  {actionLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Publish Plan"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="card-premium p-10 overflow-hidden">
            {loading ? (
              <div className="space-y-4"><Skeleton className="h-14 w-full"/><Skeleton className="h-14 w-full"/></div>
