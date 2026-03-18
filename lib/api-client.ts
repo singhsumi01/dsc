@@ -9,11 +9,20 @@ export async function apiRequest(action: string, data: any = {}, token: string |
     throw new Error('API Base URL is not configured');
   }
 
+  console.log(`[API] Requesting ${action} from ${API_BASE_URL.substring(0, 40)}...`);
+
+  if (API_BASE_URL.includes('/macros/s/') && API_BASE_URL.includes('/dev')) {
+    console.warn('[API] WARNING: You are using a /dev URL. This will likely fail for anyone but the script owner. Use /exec instead.');
+  }
+
   const response = await fetch(API_BASE_URL, {
     method: 'POST',
-    // We omit Content-Type: application/json to avoid CORS preflight (OPTIONS) 
-    // which Google Apps Script web apps do not support. 
-    // GAS will still receive the body string in e.postData.contents.
+    mode: 'cors', // Explicitly set CORS mode
+    headers: {
+      // Using 'text/plain' avoids CORS preflight (OPTIONS) in most browsers
+      // while still allowing us to send the JSON string.
+      'Content-Type': 'text/plain',
+    },
     body: JSON.stringify({
       action,
       data,

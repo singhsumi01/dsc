@@ -27,7 +27,8 @@ export default function LoginPage() {
       setAuth(response.user, response.token);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      console.error('[Login Error]', err);
+      setError(err.message || 'Login failed. Please check your network connection.');
     } finally {
       setLoading(false);
     }
