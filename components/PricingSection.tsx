@@ -7,60 +7,48 @@ const plans = [
   {
     id: 'individual',
     name: 'Individual',
-    tagline: 'Perfect for solo applicants',
+    tagline: 'For solo applicants',
     price: '999',
-    period: 'per year',
-    description: 'Ideal for individuals needing a single DSC for government portals, income tax, or MCA filings.',
-    features: [
-      '1 DSC Registration',
-      'Class 3 Individual',
-      'Video eKYC Included',
-      'Basic Support',
-      '1-Year Validity',
-    ],
+    description: 'Perfect for individuals needing a single DSC for income tax, MCA, or government portal filings.',
+    features: ['1 DSC Registration', 'Class 3 Individual', 'Video eKYC Included', 'Email Support', '1-Year Validity'],
     cta: 'Get Started',
     popular: false,
-    color: 'border-gray-200',
   },
   {
     id: 'agent-pro',
     name: 'Agent Pro',
-    tagline: 'For growing DSC agencies',
+    tagline: 'For growing agencies',
     price: '4,999',
-    period: 'per year',
-    description: 'Manage unlimited client applications with full access to all DSC categories and priority support.',
+    description: 'Manage unlimited client applications with access to all DSC categories and priority support.',
     features: [
-      'Unlimited Client Applications',
-      'All DSC Categories (Class 3, DGFT, Doc Signer)',
+      'Unlimited Clients',
+      'All DSC Types (Class 3, DGFT, Doc Signer)',
       'Priority eKYC Processing',
-      'Dedicated Partner Dashboard',
+      'Partner Dashboard',
       'Bulk Application Tools',
-      'Priority Phone & Chat Support',
-      'Monthly Statement Reports',
+      'Priority Support',
+      'Monthly Reports',
     ],
     cta: 'Start Free Trial',
     popular: true,
-    color: 'border-[--blue]',
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
-    tagline: 'For large-scale operations',
+    tagline: 'For large operators',
     price: '19,999',
-    period: 'per year',
-    description: 'Custom solutions for banks, enterprises, and large CA offices managing thousands of DSCs monthly.',
+    description: 'Custom solutions for banks, CA offices, and enterprises managing thousands of DSCs monthly.',
     features: [
       'Everything in Agent Pro',
       'Custom RBAC & Team Roles',
-      'API Integration Access',
+      'API Integration',
       'Dedicated Account Manager',
-      'Volume-Based Discounts',
-      'SLA-Backed Support (99.9%)',
-      'White-Label Options',
+      'Volume Discounts',
+      '99.9% SLA Support',
+      'White-Label Option',
     ],
     cta: 'Contact Sales',
     popular: false,
-    color: 'border-gray-200',
   },
 ];
 
@@ -69,91 +57,82 @@ export default function PricingSection() {
 
   const handlePlanClick = (planId: string) => {
     if (planId === 'enterprise') {
-      // Scroll to contact or open email
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.location.href = 'mailto:enterprise@dscportal.in';
-      }
+      window.location.href = 'mailto:enterprise@dscportal.in?subject=Enterprise Plan Inquiry';
     } else {
       router.push(`/signup?plan=${planId}`);
     }
   };
 
   return (
-    <section id="pricing" className="py-24 bg-[--navy] relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[--navy] via-[#0D2550] to-[--navy]" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-500/10 rounded-full blur-3xl" />
+    <section id="pricing" className="py-24 bg-[#0B1C3D] relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="container relative z-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="section-tag justify-center !text-blue-300">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <div className="inline-flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-[0.15em] mb-4">
+            <span className="w-5 h-0.5 bg-orange-400 rounded-full" />
             Flexible Plans
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+          </div>
+          <h2 className="font-display text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
             Transparent Pricing for<br />
-            <span className="text-gradient">Every Agency Size</span>
+            <span className="text-orange-400">Every Agency Size</span>
           </h2>
-          <p className="text-blue-200 text-lg leading-relaxed">
-            No hidden fees. No per-transaction charges. Just a simple annual license that grows with your business.
+          <p className="text-blue-200/80 text-lg leading-relaxed">
+            No hidden fees. No per-transaction charges. One simple annual license.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        {/* Plan cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-7">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white/5 border ${
+              className={`relative flex flex-col rounded-2xl p-7 border backdrop-blur-sm transition-transform hover:scale-[1.015] duration-300 ${
                 plan.popular
-                  ? 'border-[--orange] bg-white/10 scale-105 shadow-2xl shadow-orange-500/20'
-                  : 'border-white/10'
-              } rounded-2xl p-8 backdrop-blur-sm flex flex-col transition-transform hover:scale-[1.02] duration-300`}
+                  ? 'bg-white/10 border-orange-400/40 shadow-2xl shadow-orange-500/10 scale-[1.03]'
+                  : 'bg-white/5 border-white/10'
+              }`}
             >
-              {/* Popular badge */}
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[--orange] text-white text-[10px] font-black uppercase tracking-widest px-5 py-1.5 rounded-full flex items-center gap-1.5">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-5 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-orange-500/30">
                   <Zap className="w-3 h-3" />
                   Most Popular
                 </div>
               )}
 
-              {/* Plan header */}
-              <div className="mb-8">
-                <p className="text-blue-300 text-xs font-bold uppercase tracking-widest mb-1">{plan.tagline}</p>
-                <h3 className="font-display text-2xl font-black text-white mb-1">{plan.name}</h3>
-                <p className="text-blue-200/70 text-sm leading-relaxed h-16">{plan.description}</p>
+              <div className="mb-7">
+                <p className="text-blue-300/70 text-[10px] font-bold uppercase tracking-widest mb-1">{plan.tagline}</p>
+                <h3 className="font-display text-2xl font-extrabold text-white mb-2">{plan.name}</h3>
+                <p className="text-blue-200/60 text-sm leading-relaxed">{plan.description}</p>
               </div>
 
               {/* Price */}
-              <div className="mb-8 pb-8 border-b border-white/10">
+              <div className="pb-7 mb-7 border-b border-white/10">
                 <div className="flex items-baseline gap-1">
                   <span className="text-blue-300 text-lg font-medium">₹</span>
                   <span className="font-display text-5xl font-black text-white">{plan.price}</span>
                 </div>
-                <p className="text-blue-300/60 text-xs font-medium uppercase tracking-wider mt-1">{plan.period}</p>
+                <p className="text-[10px] text-blue-300/50 font-semibold uppercase tracking-widest mt-1">per year</p>
               </div>
 
               {/* Features */}
-              <ul className="space-y-3 mb-8 flex-1">
+              <ul className="space-y-3 flex-1 mb-7">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-blue-100">
-                    <Check className="w-4 h-4 text-[--green] mt-0.5 shrink-0" />
+                  <li key={f} className="flex items-start gap-3 text-sm text-blue-100/90">
+                    <Check className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
                     {f}
                   </li>
                 ))}
               </ul>
 
-              {/* CTA */}
               <button
                 onClick={() => handlePlanClick(plan.id)}
-                className={`btn w-full justify-center text-sm font-bold ${
+                className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all ${
                   plan.popular
-                    ? 'btn-accent shadow-xl shadow-orange-500/30'
-                    : 'btn !bg-white/10 !text-white !border-white/20 border hover:!bg-white/20'
+                    ? 'bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white shadow-xl shadow-orange-500/25'
+                    : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
                 }`}
               >
                 {plan.cta}
@@ -162,8 +141,7 @@ export default function PricingSection() {
           ))}
         </div>
 
-        {/* Bottom note */}
-        <p className="text-center text-blue-300/60 text-sm mt-10">
+        <p className="text-center text-blue-300/40 text-sm mt-10">
           All plans include a 7-day free trial · No credit card required to start
         </p>
       </div>
