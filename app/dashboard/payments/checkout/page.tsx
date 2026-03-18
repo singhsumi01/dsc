@@ -119,7 +119,7 @@ function CheckoutContent() {
                 <button 
                   onClick={handlePayment} 
                   disabled={loading}
-                  className="btn-primary w-full py-6 flex items-center justify-center group"
+                  className="btn-primary w-full py-6 flex items-center justify-center group pulse-glow"
                 >
                   {loading ? (
                     <Loader2 className="animate-spin h-6 w-6" />
