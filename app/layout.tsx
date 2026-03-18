@@ -1,14 +1,10 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-
-const inter = Inter({ subsets: ['latin'] });
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 export const metadata: Metadata = {
-  title: 'DSC SaaS - Digital Signature Certificate Registration',
-  description: 'Fast, secure and reliable DSC registration portal for agents and clients.',
+  title: 'DSCPortal — Digital Signature Certificates Paperless & Instant | CCA Licensed CA',
+  description: 'Apply for Class 3, DGFT, and Document Signer DSCs in under 10 minutes. 100% paperless video-based eKYC. CCA Licensed Certifying Authority under IT Act 2000.',
 };
 
 export default function RootLayout({
@@ -18,12 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="bg-white text-gray-900 antialiased">
-        <Navbar />
-        <main className="min-h-screen pt-16">
+      <body className="antialiased">
+        <LayoutWrapper>
           {children}
-        </main>
-        <Footer />
+        </LayoutWrapper>
       </body>
     </html>
   );

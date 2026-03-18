@@ -3,41 +3,41 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Settings, 
-  LogOut, 
-  Shield, 
-  Menu, 
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Settings,
+  LogOut,
+  Shield,
+  Menu,
   X,
   CreditCard,
-  History,
   Activity,
   PlusCircle,
-  Gem,
-  Bell
+  Bell,
+  ChevronRight,
+  BadgeCheck,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-interface SidebarItem {
-  name: string;
+interface NavItem {
+  label: string;
   href: string;
   icon: any;
   roles: string[];
 }
 
-const navigation: SidebarItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['Super Admin', 'Admin', 'Agent', 'Client'] },
-  { name: 'My Applications', href: '/dashboard/applications', icon: FileText, roles: ['Agent', 'Client'] },
-  { name: 'Global Inventory', href: '/dashboard/admin/applications', icon: Gem, roles: ['Super Admin', 'Admin'] },
-  { name: 'New Request', href: '/dashboard/applications/new', icon: PlusCircle, roles: ['Agent', 'Client'] },
-  { name: 'Identity Vault', href: '/dashboard/admin/users', icon: Users, roles: ['Super Admin', 'Admin'] },
-  { name: 'System Config', href: '/dashboard/admin/settings', icon: Settings, roles: ['Super Admin', 'Admin'] },
-  { name: 'Payment Trace', href: '/dashboard/admin/payments', icon: CreditCard, roles: ['Super Admin', 'Admin'] },
-  { name: 'Billings', href: '/dashboard/payments', icon: History, roles: ['Agent', 'Client'] },
-  { name: 'Kernel Logs', href: '/dashboard/admin/logs', icon: Activity, roles: ['Super Admin'] },
+const navItems: NavItem[] = [
+  { label: 'Overview', href: '/dashboard', icon: LayoutDashboard, roles: ['Super Admin', 'Admin', 'Agent', 'Client'] },
+  { label: 'New Application', href: '/dashboard/applications/new', icon: PlusCircle, roles: ['Agent', 'Client'] },
+  { label: 'My Applications', href: '/dashboard/applications', icon: FileText, roles: ['Agent', 'Client'] },
+  { label: 'Payment History', href: '/dashboard/payments', icon: CreditCard, roles: ['Agent', 'Client'] },
+  { label: 'All Applications', href: '/dashboard/admin/applications', icon: FileText, roles: ['Super Admin', 'Admin'] },
+  { label: 'User Management', href: '/dashboard/admin/users', icon: Users, roles: ['Super Admin', 'Admin'] },
+  { label: 'Finance Audit', href: '/dashboard/admin/payments', icon: CreditCard, roles: ['Super Admin', 'Admin'] },
+  { label: 'Portal Settings', href: '/dashboard/admin/settings', icon: Settings, roles: ['Super Admin', 'Admin'] },
+  { label: 'System Logs', href: '/dashboard/admin/logs', icon: Activity, roles: ['Super Admin'] },
 ];
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -47,121 +47,133 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
+    if (!user) router.push('/login');
   }, [user, router]);
 
   if (!user) return null;
 
-  const filteredNav = navigation.filter(item => item.roles.includes(user.Role));
+  const filtered = navItems.filter(i => i.roles.includes(user.Role));
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-6 pt-6 pb-4 border-b border-gray-100">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[--blue] flex items-center justify-center">
+            <Shield className="w-5 h-5 text-white" />
+          </div>
+          <span className="font-bold text-lg text-[--navy]">
+            DSC<span className="text-[--orange]">Portal</span>
+          </span>
+        </Link>
+        <div className="mt-3 text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+          <BadgeCheck className="w-3 h-3 text-[--green]" />
+          CCA Licensed CA
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 pt-6 pb-4 overflow-y-auto space-y-0.5">
+        {filtered.map(item => {
+          const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setSidebarOpen(false)}
+              className={`sidebar-item ${active ? 'active' : ''}`}
+            >
+              <item.icon className="w-4 h-4 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              {active && <ChevronRight className="w-3.5 h-3.5 opacity-40" />}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* User footer */}
+      <div className="px-3 py-4 border-t border-gray-100 mt-auto">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 mb-3">
+          <div className="w-9 h-9 rounded-full bg-[--blue] flex items-center justify-center text-white font-bold text-sm shrink-0">
+            {user.Name?.charAt(0)?.toUpperCase() ?? 'U'}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">{user.Name}</p>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">{user.Role}</p>
+          </div>
+        </div>
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex hero-gradient">
-      {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}></div>
-        <div className="fixed inset-y-0 left-0 flex flex-col w-72 bg-white pt-5 pb-4 shadow-2xl animate-in slide-in-from-left duration-300">
-          <div className="flex items-center px-8 mb-10">
-            <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 mr-3">
-               <Shield className="h-6 w-6" />
-            </div>
-            <span className="text-xl font-black text-gray-900 tracking-tighter">DSC <span className="text-indigo-600">Portal</span></span>
-          </div>
-          <nav className="flex-1 px-6 space-y-2 overflow-y-auto">
-            {filteredNav.map((item) => (
-              <NavLink key={item.name} item={item} active={pathname === item.href} />
-            ))}
-          </nav>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-100 fixed inset-y-0 left-0 z-30">
+        <SidebarContent />
+      </aside>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-80 bg-white/70 backdrop-blur-2xl border-r border-gray-100 shadow-xl shadow-indigo-50/20 relative z-20">
-          <div className="flex items-center h-24 px-10 border-b border-gray-50/50">
-             <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 mr-4">
-               <Shield className="h-6 w-6" />
-            </div>
-            <span className="text-2xl font-black text-gray-900 tracking-tighter">DSC <span className="text-indigo-600">SaaS</span></span>
-          </div>
-          
-          <div className="flex-1 flex flex-col pt-10 pb-4 overflow-y-auto">
-            <nav className="flex-1 px-8 space-y-3">
-              {filteredNav.map((item) => (
-                <NavLink key={item.name} item={item} active={pathname === item.href} />
-              ))}
-            </nav>
-          </div>
-
-          <div className="p-8 border-t border-gray-50/50">
-            <div className="p-6 bg-white rounded-3xl border border-gray-50 shadow-sm relative overflow-hidden group mb-6">
-              <div className="absolute top-0 right-0 p-3 opacity-[0.05] group-hover:scale-150 transition-transform duration-1000">
-                 <Gem className="h-10 w-10 text-indigo-600" />
-              </div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Authenticated Identity</p>
-              <p className="text-base font-black text-gray-900 truncate tracking-tight">{user.Name}</p>
-              <span className="inline-block mt-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest ring-1 ring-indigo-100">
-                 {user.Role}
-              </span>
-            </div>
-            <button
-              onClick={logout}
-              className="w-full flex items-center justify-center px-4 py-4 text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-50 rounded-2xl transition-all active:scale-95"
-            >
-              <LogOut className="mr-3 h-4 w-4" />
-              Terminate Session
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-gray-950/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <aside className="relative flex flex-col w-72 h-full bg-white shadow-xl">
+            <button onClick={() => setSidebarOpen(false)} className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600">
+              <X className="w-5 h-5" />
             </button>
-          </div>
+            <SidebarContent />
+          </aside>
         </div>
-      </div>
+      )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        <header className="h-24 bg-white/70 backdrop-blur-2xl border-b border-gray-50 flex items-center justify-between px-10">
-          <div className="flex items-center">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-900 mr-6">
-              <Menu className="h-6 w-6" />
-            </button>
-            <div className="flex items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
-               <Shield className="h-4 w-4 mr-2 text-indigo-600" /> Secure Protocol v4.0
-            </div>
+      <div className="flex-1 flex flex-col lg:pl-64">
+        {/* Top bar */}
+        <header className="h-14 bg-white border-b border-gray-100 flex items-center gap-4 px-6 sticky top-0 z-20">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-gray-500 hidden md:flex">
+            <Shield className="w-4 h-4 text-[--blue]" />
+            <span>Paperless DSC Infrastructure</span>
           </div>
-          <div className="flex items-center space-x-6">
-             <button className="p-3 text-gray-400 hover:text-indigo-600 transition-colors relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-             </button>
-             <div className="h-10 w-10 bg-gray-100 rounded-2xl border-2 border-white shadow-sm overflow-hidden">
-                <div className="w-full h-full flex items-center justify-center font-black text-xs text-gray-500">
-                   {user.Name.charAt(0)}
-                </div>
-             </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            <button className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+              <Bell className="w-4.5 h-4.5 w-[18px] h-[18px]" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[--orange] rounded-full" />
+            </button>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 bg-gray-50 hover:bg-[--blue-light] rounded-xl px-3 py-1.5 transition-colors"
+            >
+              <div className="w-6 h-6 rounded-full bg-[--blue] flex items-center justify-center text-white text-[10px] font-bold">
+                {user.Name?.charAt(0)?.toUpperCase() ?? 'U'}
+              </div>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">{user.Name}</span>
+            </Link>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-10 lg:p-14 custom-scrollbar">
-          <div className="max-w-[1600px] mx-auto">
+        {/* Page content */}
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
             {children}
           </div>
         </main>
       </div>
     </div>
-  );
-}
-
-function NavLink({ item, active }: { item: SidebarItem, active: boolean }) {
-  return (
-    <Link
-      href={item.href}
-      className={`flex items-center px-5 py-4 text-xs font-black uppercase tracking-[0.15em] rounded-2xl transition-all duration-300 group ${
-        active 
-          ? 'bg-indigo-600 text-white shadow-2xl shadow-indigo-200 translate-x-1.5' 
-          : 'text-gray-400 hover:bg-white hover:text-gray-900 border border-transparent hover:border-gray-50'
-      }`}
-    >
-      <item.icon className={`mr-4 h-5 w-5 transition-transform duration-500 ${active ? 'text-white' : 'text-gray-400 group-hover:text-indigo-600 group-hover:scale-110'}`} />
-      {item.name}
-    </Link>
   );
 }

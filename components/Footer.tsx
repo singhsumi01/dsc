@@ -1,46 +1,85 @@
+import Link from 'next/link';
+import { Shield } from 'lucide-react';
+
+const links = {
+  Services: [
+    { label: 'Class 3 Individual DSC', href: '/#categories' },
+    { label: 'Class 3 Organization DSC', href: '/#categories' },
+    { label: 'DGFT DSC', href: '/#categories' },
+    { label: 'Document Signer DSC', href: '/#categories' },
+  ],
+  Partners: [
+    { label: 'Become a Partner', href: '/signup' },
+    { label: 'Partner Login', href: '/login' },
+    { label: 'Pricing Plans', href: '/#pricing' },
+    { label: 'Partner FAQs', href: '/#' },
+  ],
+  Support: [
+    { label: 'Help Center', href: '/#' },
+    { label: 'Track DSC Status', href: '/#' },
+    { label: 'Token Drivers', href: '/#' },
+    { label: 'CCA Guidelines', href: '/#' },
+  ],
+  Legal: [
+    { label: 'Privacy Policy', href: '/#' },
+    { label: 'Terms of Service', href: '/#' },
+    { label: 'CA License Details', href: '/#' },
+    { label: 'IT Act Compliance', href: '/#' },
+  ],
+};
+
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-100 pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-          <div className="col-span-2">
-            <span className="text-xl font-bold text-indigo-600 mb-4 block">DSC SaaS</span>
-            <p className="text-gray-500 max-w-xs text-sm leading-relaxed">
-              Premium Digital Signature Certificate registration platform for Agents and Clients. 
-              Secure, fast, and reliable.
+    <footer id="contact" className="bg-gray-950 text-gray-300 pt-16 pb-8">
+      <div className="container">
+        {/* Top row */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-[--blue] flex items-center justify-center">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold text-white text-lg">DSC<span className="text-[--orange]">Portal</span></span>
+            </div>
+            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+              India's trusted Certifying Authority platform for Class 3, DGFT, and Document Signer DSCs. 
+              CCA Licensed — IT Act 2000 Compliant.
             </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="bg-gray-800 text-gray-400 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full">CCA Licensed</span>
+              <span className="bg-gray-800 text-gray-400 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full">FIPS 140-2</span>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-indigo-600">Features</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Pricing</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Guidelines</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-indigo-600">Help Center</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Contact Us</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Status</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-indigo-600">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Terms of Service</a></li>
-            </ul>
-          </div>
+
+          {/* Link columns */}
+          {Object.entries(links).map(([section, items]) => (
+            <div key={section}>
+              <h4 className="text-white font-semibold text-sm mb-4">{section}</h4>
+              <ul className="space-y-2.5">
+                {items.map(({ label, href }) => (
+                  <li key={label}>
+                    <Link
+                      href={href}
+                      className="text-sm text-gray-500 hover:text-white transition-colors duration-150"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-xs mb-4 md:mb-0">
-            © 2024 DSC SaaS Registration Portal. All rights reserved.
+
+        {/* Bottom row */}
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-600">
+            © {new Date().getFullYear()} DSCPortal by Registered CA. All rights reserved. | Licensed under the IT Act 2000.
           </p>
-          <div className="flex space-x-6">
-            <span className="text-gray-400 text-xs">Powered by Google Apps Script & Next.js</span>
-          </div>
+          <p className="text-xs text-gray-700">
+            Built with Next.js · Secured by Google Cloud · Powered by HSM
+          </p>
         </div>
       </div>
     </footer>

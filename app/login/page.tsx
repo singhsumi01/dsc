@@ -2,19 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  LogIn, 
-  Mail, 
-  Lock, 
-  Loader2, 
-  ShieldCheck, 
-  ShieldQuestion,
-  ArrowRight
-} from 'lucide-react';
+import { Shield, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { apiRequest } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/store';
-import InputField from '@/components/InputField';
 import Toast from '@/components/Toast';
 
 export default function LoginPage() {
@@ -33,95 +24,143 @@ export default function LoginPage() {
       const res = await apiRequest('auth/login', { email, password });
       if (res.success) {
         setAuth(res.user, res.token);
-        setToast({ message: 'Welcome back! Redirecting...', type: 'success' });
+        setToast({ message: 'Login successful! Redirecting...', type: 'success' });
         setTimeout(() => router.push('/dashboard'), 1000);
       } else {
         setToast({ message: res.error || 'Invalid credentials', type: 'error' });
       }
     } catch (err) {
-      setToast({ message: 'Failed to connect to security server', type: 'error' });
+      setToast({ message: 'Connection error. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-6 relative overflow-hidden hero-gradient">
-      {/* Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/20 rounded-full blur-[120px] animate-slow-spin"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-200/20 rounded-full blur-[120px] animate-slow-spin" style={{ animationDirection: 'reverse' }}></div>
-
-      <div className="w-full max-w-lg animate-fade-in-up relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center p-4 bg-white rounded-3xl shadow-xl shadow-indigo-100 border border-gray-100 mb-6 group hover:scale-110 transition-transform">
-            <LogIn className="h-10 w-10 text-indigo-600 group-hover:rotate-12 transition-transform" />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Left panel — branding */}
+      <div className="hidden lg:flex lg:w-1/2 hero-bg flex-col justify-between p-12 relative overflow-hidden">
+        <div className="hero-mesh" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/30 to-transparent" />
+        
+        {/* Logo */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+            <Shield className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-5xl font-black text-gray-900 tracking-tighter leading-none mb-2">Paperless <span className="text-indigo-600">DSC</span></h1>
-          <p className="text-gray-500 font-medium italic">CCA Licensed Digital Signature Infrastructure.</p>
+          <span className="text-white font-bold text-xl">DSC<span className="text-orange-400">Portal</span></span>
         </div>
 
-        <div className="card-premium p-10 lg:p-12 premium-glass">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <InputField 
-              label="Email Address" 
-              type="email" 
-              placeholder="name@company.com" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
-              icon={Mail} 
-              required 
-            />
-            <InputField 
-              label="Secret Password" 
-              type="password" 
-              placeholder="••••••••" 
-              value={password} 
-              onChange={e => setPassword(e.target.value)} 
-              icon={Lock} 
-              required 
-            />
-            
-            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-              <label className="flex items-center cursor-pointer hover:text-indigo-600 transition-colors">
-                <input type="checkbox" className="mr-2 rounded border-gray-200 text-indigo-600 focus:ring-indigo-500/20" />
-                Stay Secured
-              </label>
-              <Link href="/forgot" className="hover:text-indigo-600 transition-colors">Restore Access</Link>
+        {/* Content */}
+        <div className="relative z-10">
+          <h2 className="font-display text-4xl font-black text-white mb-4 leading-snug">
+            India's Fastest<br />
+            <span className="text-gradient">DSC Issuance</span><br />
+            Platform.
+          </h2>
+          <p className="text-blue-100 text-base leading-relaxed mb-8 max-w-md">
+            Apply for Class 3, DGFT, and Document Signer certificates in under 10 minutes with 100% paperless video eKYC.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { num: '2M+', label: 'DSCs Issued' },
+              { num: '15K+', label: 'Partner Agents' },
+              { num: '<10 min', label: 'Avg. Issuance' },
+              { num: '99.9%', label: 'Uptime' },
+            ].map(({ num, label }) => (
+              <div key={label} className="bg-white/10 border border-white/15 rounded-xl px-4 py-3 backdrop-blur-sm">
+                <p className="font-display text-xl font-black text-white">{num}</p>
+                <p className="text-xs text-blue-200 font-medium">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+        {toast && (
+          <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        )}
+
+        <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2 mb-10">
+            <div className="w-9 h-9 rounded-lg bg-[--blue] flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-xl text-[--navy]">DSC<span className="text-[--orange]">Portal</span></span>
+          </div>
+
+          <div className="mb-8">
+            <h1 className="font-display text-3xl font-black text-gray-900 mb-2">Sign In</h1>
+            <p className="text-gray-500 text-sm">
+              New here?{' '}
+              <Link href="/signup" className="text-[--blue] font-semibold hover:underline">
+                Create a partner account
+              </Link>
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[--blue] transition-all bg-white placeholder-gray-400"
+                />
+              </div>
             </div>
 
-            <button 
-              type="submit" 
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-semibold text-gray-700">Password</label>
+                <a href="#" className="text-xs text-[--blue] font-semibold hover:underline">Forgot password?</a>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[--blue] transition-all bg-white placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
               disabled={loading}
-              className="w-full btn-primary flex items-center justify-center py-5 group"
+              className="btn btn-primary w-full justify-center !py-3.5 text-base disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <Loader2 className="animate-spin h-6 w-6" />
+                <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</>
               ) : (
-                <>
-                  Connect Securely 
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
-                </>
+                <>Sign In <ArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
 
-          <div className="mt-12 pt-8 border-t border-gray-100 flex items-center justify-center space-x-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-             <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
-                <ShieldCheck className="h-4 w-4 mr-2 text-indigo-500" /> AES-256
-             </div>
-             <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
-                <ShieldQuestion className="h-4 w-4 mr-2 text-violet-500" /> SSL-Cert
-             </div>
+          {/* Divider */}
+          <div className="mt-8 pt-8 border-t border-gray-100">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              {['CCA Licensed', 'FIPS 140-2 HSM', 'IT Act 2000'].map(t => (
+                <div key={t} className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-tight">{t}</div>
+              ))}
+            </div>
           </div>
         </div>
-
-        <p className="mt-10 text-center text-sm font-bold text-gray-400">
-          New to specialized DSC? {' '}
-          <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 underline decoration-indigo-200 decoration-2 underline-offset-4">Create Enterprise Account</Link>
-        </p>
       </div>
-
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }
