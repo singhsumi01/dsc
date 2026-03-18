@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   UserPlus, 
   Mail, 
@@ -17,7 +17,7 @@ import { apiRequest } from '@/lib/api-client';
 import InputField from '@/components/InputField';
 import Toast from '@/components/Toast';
 
-export default function SignupPage() {
+function SignupForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,6 +28,9 @@ export default function SignupPage() {
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
   
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const plan = searchParams.get('plan');
+  const service = searchParams.get('service');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +44,11 @@ export default function SignupPage() {
       const res = await apiRequest('auth/signup', formData);
       if (res.success) {
         setToast({ message: 'Account created! Redirecting to login...', type: 'success' });
-        setTimeout(() => router.push('/login'), 2000);
+        const query = new URLSearchParams();
+        if (plan) query.set('plan', plan);
+        if (service) query.set('service', service);
+        const queryString = query.toString();
+        setTimeout(() => router.push(`/login${queryString ? `?${queryString}` : ''}`), 2000);
       } else {
         setToast({ message: res.error || 'Signup failed', type: 'error' });
       }
@@ -145,5 +152,13 @@ export default function SignupPage() {
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-blue-600" /></div>}>
+      <SignupForm />
+    </Suspense>
   );
 }

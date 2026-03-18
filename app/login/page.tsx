@@ -1,20 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Mail, Lock, Loader2, ArrowRight, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { apiRequest } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/store';
 import Toast from '@/components/Toast';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
+  
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setAuth = useAuthStore(s => s.setAuth);
+  const setSelection = useAuthStore(state => state.setSelection);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +25,15 @@ export default function LoginPage() {
     try {
       const res = await apiRequest('auth/login', { email, password });
       if (res.success) {
+        const plan = searchParams.get('plan');
+        const service = searchParams.get('service');
+        if (plan || service) {
+          setSelection(plan, service);
+        }
+        
         setAuth(res.user, res.token);
         setToast({ message: 'Login successful! Redirecting...', type: 'success' });
-        setTimeout(() => router.push('/dashboard'), 900);
+        setTimeout(() => router.push('/dashboard'), 1000);
       } else {
         setToast({ message: res.error || 'Invalid credentials', type: 'error' });
       }
@@ -146,5 +155,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-blue-600" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

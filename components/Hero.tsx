@@ -136,8 +136,9 @@ export default function Hero() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {dscTypes.map(({ emoji, title, desc, tags }, i) => (
-              <div
+              <Link
                 key={title}
+                href={`/signup?service=${encodeURIComponent(title)}`}
                 className="bg-white border border-gray-100 rounded-2xl p-7 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 hover:-translate-y-1 transition-all duration-300 flex flex-col group anim-fade-up"
                 style={{ animationDelay: `${i * 0.08}s` }}
               >
@@ -153,7 +154,7 @@ export default function Hero() {
                     </span>
                   ))}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

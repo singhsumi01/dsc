@@ -55,6 +55,7 @@ export default function NewApplicationPage() {
 
   const router = useRouter();
   const token = useAuthStore(state => state.token);
+  const { selection, setSelection } = useAuthStore();
 
   useEffect(() => {
     async function fetchData() {
@@ -63,8 +64,40 @@ export default function NewApplicationPage() {
           apiRequest('categories/list', {}, token),
           apiRequest('pricing/list', {}, token)
         ]);
-        setCategories(catRes.data || []);
-        setPricing(priceRes.data || []);
+        const fetchedCats = catRes.data || [];
+        const fetchedPrices = priceRes.data || [];
+        setCategories(fetchedCats);
+        setPricing(fetchedPrices);
+
+        // Auto-selection logic
+        if (selection.service || selection.plan) {
+          let targetService = selection.service;
+          
+          // Map landing page plan to service if necessary
+          if (!targetService && selection.plan === 'individual') targetService = 'Class 3 Individual';
+          
+          if (targetService) {
+            const foundCat = fetchedCats.find((c: any) => c.CategoryName === targetService || c.CategoryName.includes(targetService));
+            if (foundCat) {
+              const serviceName = foundCat.CategoryName;
+              // We need to set state but useEffect state updates are tricky with sequential selections
+              setFormData((prev: any) => {
+                const newForm = { ...prev, dscType: serviceName };
+                
+                // If it's a specific plan, try to select that too
+                // For now, let's just pick the first plan for that service if it's auto-selected
+                const firstPlan = fetchedPrices.find((p: any) => p.Category === serviceName);
+                if (firstPlan) {
+                  newForm.planTier = firstPlan.TierName;
+                  newForm.price = firstPlan.Price;
+                }
+                return newForm;
+              });
+            }
+          }
+          // Clear selection so it doesn't persist to next new application
+          setSelection(null, null);
+        }
       } catch (err) {
         setToast({ message: 'Failed to fetch catalog data', type: 'error' });
       } finally {
