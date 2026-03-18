@@ -1,8 +1,26 @@
-@import "tailwindcss";
+@font-face {
+    font-family: "Geologica ExtraLight";
+    src: url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.eot");
+    src: url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.eot?#iefix")format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.woff2")format("woff2"),
+    url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.woff")format("woff"),
+    url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.ttf")format("truetype"),
+    url("https://db.onlinewebfonts.com/t/7dacfeff1315ff5f9fe18c907edc3d2c.svg#Geologica ExtraLight")format("svg");
+}
+
+@font-face {
+    font-family: "Geologica";
+    src: url("https://db.onlinewebfonts.com/t/5bae5b72e8cf34f03c7ee752cee858e8.eot");
+    src: url("https://db.onlinewebfonts.com/t/5bae5b72e8cf34f03c7ee752cee858e8.eot?#iefix")format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/5bae5b72e8cf34f03c7ee752cee858e8.woff2")format("woff2"),
+    url("https://db.onlinewebfonts.com/t/5bae5b72e8cf34f03c7ee752cee858e8.woff")format("woff"),
+    url("https://db.onlinewebfonts.com/t/5bae5b72e8cf34f03c7ee752cee858e8.ttf")format("truetype"),
+    url("https://db.onlinewebfonts.com/t/5bae5b72e8cf34f03c7ee752cee858e8.svg#Geologica")format("svg");
+}
 
 @theme {
-  --font-sans: "Inter", var(--font-geist-sans);
-  --font-display: "Outfit", sans-serif;
+  --font-sans: "Geologica", "Inter", sans-serif;
+  --font-display: "Geologica ExtraLight", "Outfit", sans-serif;
   
   --animate-fade-in-up: fade-in-up 0.5s ease-out forwards;
   --animate-slow-spin: spin 8s linear infinite;
