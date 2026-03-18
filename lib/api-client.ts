@@ -17,11 +17,12 @@ export async function apiRequest(action: string, data: any = {}, token: string |
 
   const response = await fetch(API_BASE_URL, {
     method: 'POST',
-    mode: 'cors', // Explicitly set CORS mode
+    mode: 'cors',
+    cache: 'no-cache',
+    redirect: 'follow',
+    credentials: 'omit', // GAS doesn't support cross-origin credentials
     headers: {
-      // Using 'text/plain' avoids CORS preflight (OPTIONS) in most browsers
-      // while still allowing us to send the JSON string.
-      'Content-Type': 'text/plain',
+      'Content-Type': 'text/plain;charset=utf-8',
     },
     body: JSON.stringify({
       action,
@@ -31,10 +32,19 @@ export async function apiRequest(action: string, data: any = {}, token: string |
   });
 
   if (!response.ok) {
-    throw new Error(`API Request failed: ${response.statusText}`);
+    throw new Error(`API Request failed: ${response.status} ${response.statusText}`);
   }
 
-  const result = await response.json();
+  // We parse as text first to handle any non-JSON responses gracefully
+  const text = await response.text();
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (e) {
+    console.error('[API] Failed to parse response as JSON:', text);
+    throw new Error('Invalid server response format');
+  }
+
   if (result.success === false) {
     throw new Error(result.error || 'Unknown API error');
   }
