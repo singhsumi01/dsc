@@ -22,13 +22,13 @@ export default function InputField({
   required = false,
 }: InputFieldProps) {
   return (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">
+    <div className="mb-6 group">
+      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2 px-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <div className="relative group">
+      <div className="relative">
         {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-600 transition-all duration-300">
             <Icon className="h-5 w-5" />
           </div>
         )}
@@ -38,12 +38,12 @@ export default function InputField({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`block w-full rounded-xl border-gray-200 ${
-            Icon ? 'pl-11' : 'pl-4'
-          } pr-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-white shadow-sm hover:border-gray-300`}
+          className={`block w-full rounded-2xl border-2 border-gray-50 ${
+            Icon ? 'pl-12' : 'pl-5'
+          } pr-5 py-4 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 focus:border-indigo-600 transition-all bg-white shadow-sm hover:border-gray-200`}
         />
       </div>
-      {error && <p className="mt-1.5 text-xs text-red-500 ml-1">{error}</p>}
+      {error && <p className="mt-2 text-[10px] font-black uppercase tracking-tight text-red-500 px-1">{error}</p>}
     </div>
   );
 }

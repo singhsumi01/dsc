@@ -3,179 +3,212 @@
 import { useState, useEffect } from 'react';
 import { 
   Settings, 
-  PlusCircle, 
+  Plus, 
   Trash2, 
-  Edit2, 
-  Save, 
-  Zap, 
-  Layers,
-  CheckCircle,
-  Loader2
+  Edit3, 
+  FileBadge, 
+  CreditCard,
+  Loader2,
+  Zap,
+  Layout,
+  Tag
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/store';
+import Skeleton from '@/components/Skeleton';
+import Toast from '@/components/Toast';
 
 export default function AdminSettingsPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [pricing, setPricing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
+
   const token = useAuthStore(state => state.token);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [cats, prices] = await Promise.all([
-          apiRequest('categories/list', {}, token),
-          apiRequest('pricing/list', {}, token)
-        ]);
-        setCategories(cats.data || []);
-        setPricing(prices.data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = async () => {
+    try {
+      const [catRes, priceRes] = await Promise.all([
+        apiRequest('categories/list', {}, token),
+        apiRequest('pricing/list', {}, token)
+      ]);
+      setCategories(catRes.data || []);
+      setPricing(priceRes.data || []);
+    } catch (err) {
+      setToast({ message: 'Failed to sync with global catalog', type: 'error' });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     if (token) fetchData();
   }, [token]);
 
   const handleAddCategory = async () => {
-    const name = prompt('Category Name:');
-    const description = prompt('Description:');
-    if (!name) return;
+    const name = prompt('Enter Global Category Name:');
+    const description = prompt('Provide Category Description:');
+    if (!name || !description) return;
+
+    setActionLoading(true);
     try {
       await apiRequest('admin/addCategory', { name, description }, token);
-      window.location.reload(); // Refresh to see new ID
-    } catch (e) { alert('Failed'); }
-  };
-
-  const handleDeleteCategory = async (id: string) => {
-    if (!confirm('Delete category?')) return;
-    try {
-      await apiRequest('admin/deleteCategory', { id }, token);
-      setCategories(categories.filter(c => c.CategoryID !== id));
-    } catch (e) { alert('Failed'); }
+      setToast({ message: 'New Category Cataloged', type: 'success' });
+      fetchData();
+    } catch (err) {
+      setToast({ message: 'Failed to add entry', type: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleAddPricing = async () => {
-    const category = prompt('Category Name (Must match exactly):');
-    const tierName = prompt('Tier Name (e.g. Basic, Pro):');
-    const price = prompt('Price (Numeric):');
+    const category = prompt('Category Target Name:');
+    const tierName = prompt('Pricing Tier Label (e.g. Premium):');
+    const price = prompt('Base Price (Numeric):');
     if (!category || !tierName || !price) return;
+
+    setActionLoading(true);
     try {
       await apiRequest('admin/addPricing', { category, tierName, price: Number(price) }, token);
-      window.location.reload();
-    } catch (e) { alert('Failed'); }
+      setToast({ message: 'Pricing Plan Broadcasted', type: 'success' });
+      fetchData();
+    } catch (err) {
+      setToast({ message: 'Failed to broadcast plan', type: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleDeletePricing = async (id: string) => {
-    if (!confirm('Delete pricing?')) return;
+  const handleDeleteItem = async (action: string, id: string) => {
+    if (!confirm('Permanently decommission this catalog entry?')) return;
+    setActionLoading(true);
     try {
-      await apiRequest('admin/deletePricing', { id }, token);
-      setPricing(pricing.filter(p => p.TierID !== id));
-    } catch (e) { alert('Failed'); }
+      await apiRequest(`admin/${action}`, { id }, token);
+      setToast({ message: 'Entry decommissioned', type: 'success' });
+      fetchData();
+    } catch (err) {
+      setToast({ message: 'Deletion request rejected', type: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
   };
+
+  const SectionHeader = ({ icon: Icon, title, desc, onAction, actionLabel }: any) => (
+    <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+      <div className="animate-fade-in-up">
+        <h3 className="text-3xl font-black text-gray-900 tracking-tighter flex items-center leading-none">
+           <Icon className="h-8 w-8 mr-3 text-indigo-600" />
+           {title}
+        </h3>
+        <p className="text-gray-500 font-medium italic mt-2">{desc}</p>
+      </div>
+      <button 
+        onClick={onAction}
+        disabled={actionLoading}
+        className="btn-primary py-3 px-6 h-14 flex items-center text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-100 group"
+      >
+        {actionLoading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />}
+        {actionLabel}
+      </button>
+    </div>
+  );
 
   return (
-    <div className="space-y-12">
-      <div>
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center">
-          System Configuration <Settings className="ml-3 h-7 w-7 text-indigo-600 animate-spin-slow" />
-        </h1>
-        <p className="text-gray-500 mt-1 font-medium italic">Configure DSC categories, service pricing and feature tiers.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Category Management */}
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center">
-              <Layers className="mr-3 h-5 w-5 text-indigo-600" />
-              DSC Categories
-            </h3>
-            <button 
-              onClick={handleAddCategory}
-              className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
-            >
-              <PlusCircle className="h-5 w-5" />
-            </button>
-          </div>
-          
-          <div className="space-y-4">
-            {categories.length === 0 && !loading && (
-              <p className="text-sm text-gray-400 italic">No categories defined.</p>
-            )}
-            {categories.map((cat) => (
-              <div key={cat.CategoryID} className="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
-                <div>
-                  <p className="font-bold text-gray-900 leading-none mb-1">{cat.CategoryName}</p>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none mt-1">Status: Active</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={() => handleDeleteCategory(cat.CategoryID)}
-                    className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Pricing Management */}
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center">
-              <Zap className="mr-3 h-5 w-5 text-amber-500" />
-              Service Pricing
-            </h3>
-            <button 
-              onClick={handleAddPricing}
-              className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors"
-            >
-              <PlusCircle className="h-5 w-5" />
-            </button>
-          </div>
-          
-          <div className="space-y-4">
-            {pricing.map((price) => (
-              <div key={price.TierID} className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mr-4">
-                    <span className="font-black text-indigo-600 text-xs">₹</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">{price.TierName}</h4>
-                    <p className="text-[10px] text-gray-500 font-medium mb-1">{price.Category}</p>
-                    <p className="text-lg font-black text-indigo-600">₹{price.Price}</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => handleDeletePricing(price.TierID)}
-                  className="p-2 bg-white rounded-lg shadow-sm border border-gray-100 hover:text-red-500 transition-all active:scale-95"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-indigo-600 rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between shadow-xl shadow-indigo-100 group">
+    <div className="space-y-20 animate-fade-in-up pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h3 className="text-2xl font-bold text-white mb-2">Publish Changes</h3>
-          <p className="text-indigo-100 max-w-md opacity-80 text-sm leading-relaxed">
-            Updated settings will be instantly available across the public landing page and client dashboards.
-          </p>
+          <h1 className="text-5xl font-black text-gray-900 tracking-tighter leading-none mb-3">
+             System <span className="text-indigo-600">Config</span>
+          </h1>
+          <p className="text-gray-500 font-medium italic text-lg opacity-80">Refine your service offerings and global pricing models.</p>
         </div>
-        <button className="mt-8 md:mt-0 bg-white text-indigo-600 px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center shadow-lg hover:shadow-indigo-500/20 transition-all group-hover:scale-105">
-          <Save className="mr-2 h-5 w-5" />
-          Sync to Production
-        </button>
+        <div className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 bg-gray-50 px-4 py-2 rounded-xl">
+           <Layout className="h-4 w-4 mr-2 text-indigo-500" /> Catalog Version 2.0
+        </div>
       </div>
+
+      <section>
+        <SectionHeader 
+          icon={Tag} 
+          title="DSC Categories" 
+          desc="Manage primary service classifications for the application wizard." 
+          onAction={handleAddCategory}
+          actionLabel="Add Category"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {loading ? (
+            <><Skeleton className="h-48 w-full"/><Skeleton className="h-48 w-full"/><Skeleton className="h-48 w-full"/></>
+          ) : (
+            categories.map(cat => (
+              <div key={cat.CategoryID} className="card-premium p-8 group">
+                <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-150 transition-transform duration-1000">
+                   <FileBadge className="h-32 w-32" />
+                </div>
+                <div className="flex items-center justify-between mb-6 relative z-10">
+                   <div className="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                      <FileBadge className="h-5 w-5" />
+                   </div>
+                   <button onClick={() => handleDeleteItem('deleteCategory', cat.CategoryID)} className="text-gray-300 hover:text-red-500 transition-colors">
+                      <Trash2 className="h-4 w-4" />
+                   </button>
+                </div>
+                <h4 className="text-xl font-black text-gray-900 mb-2 relative z-10">{cat.CategoryName}</h4>
+                <p className="text-xs text-gray-400 font-medium italic leading-relaxed relative z-10">{cat.Description}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="pt-10 border-t border-gray-100">
+        <SectionHeader 
+          icon={CreditCard} 
+          title="Pricing Plans" 
+          desc="Define validity tiers and unit costs for each DSC category." 
+          onAction={handleAddPricing}
+          actionLabel="Create Plan"
+        />
+        <div className="card-premium p-10 overflow-hidden">
+           {loading ? (
+             <div className="space-y-4"><Skeleton className="h-14 w-full"/><Skeleton className="h-14 w-full"/></div>
+           ) : (
+             <div className="overflow-x-auto -mx-10 px-10">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
+                      <th className="pb-6">Target Category</th>
+                      <th className="pb-6">Plan Label</th>
+                      <th className="pb-6">Unit Price</th>
+                      <th className="pb-6 text-right">Control</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {pricing.map(p => (
+                      <tr key={p.PricingID} className="group hover:bg-gray-50/50 transition-colors">
+                        <td className="py-6 font-black text-gray-900">{p.Category}</td>
+                        <td className="py-6">
+                           <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest ring-1 ring-indigo-100">
+                              {p.TierName}
+                           </span>
+                        </td>
+                        <td className="py-6 text-lg font-black text-indigo-600 tracking-tight">₹{p.Price}</td>
+                        <td className="py-6 text-right">
+                           <button onClick={() => handleDeleteItem('deletePricing', p.PricingID)} className="p-3 text-gray-300 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm active:scale-95">
+                              <Trash2 className="h-4 w-4" />
+                           </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+             </div>
+           )}
+        </div>
+      </section>
+      
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }

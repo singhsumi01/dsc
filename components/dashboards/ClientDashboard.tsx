@@ -1,19 +1,20 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { 
   FileText, 
   Clock, 
-  CheckCircle, 
+  CheckCircle2, 
   AlertCircle, 
-  PlusCircle, 
+  Plus, 
   ArrowRight,
   TrendingUp,
-  CreditCard
+  Layout
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/store';
+import Skeleton from '@/components/Skeleton';
 
 export default function ClientDashboard({ user }: { user: any }) {
   const [stats, setStats] = useState<any>(null);
@@ -33,110 +34,130 @@ export default function ClientDashboard({ user }: { user: any }) {
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 800); 
       }
     }
     if (token) fetchData();
   }, [token]);
 
-  const statCards = [
-    { name: 'Total Applications', value: stats?.total || 0, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { name: 'Pending Review', value: stats?.pending || 0, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { name: 'Success Rate', value: '100%', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { name: 'Recent Payments', value: stats?.payments || 0, icon: CreditCard, color: 'text-rose-600', bg: 'bg-rose-50' },
-  ];
+  const StatSkeleton = () => (
+    <div className="card-premium p-8">
+      <Skeleton className="h-4 w-24 mb-4" />
+      <Skeleton className="h-10 w-16" />
+    </div>
+  );
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-10 animate-fade-in-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            Hi, {user.Name.split(' ')[0]} 👋
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-none mb-2">
+            Welcome, <span className="text-indigo-600 underline decoration-indigo-100 decoration-8 underline-offset-4">{user.Name}</span>
           </h1>
-          <p className="text-gray-500 mt-1 font-medium">Welcome back to your DSC dashboard.</p>
+          <p className="text-gray-500 font-medium italic">Track your Digital Signature Certificate status in real-time.</p>
         </div>
         <Link 
           href="/dashboard/applications/new" 
-          className="bg-indigo-600 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+          className="btn-primary flex items-center group"
         >
-          <PlusCircle className="mr-2 h-5 w-5" />
+          <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
           New Application
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
-          <div key={stat.name} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${stat.bg} p-3 rounded-2xl`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
-              </div>
-              <span className="text-xs font-bold text-gray-400 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
-                +12%
-              </span>
-            </div>
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{stat.name}</p>
-            <p className="text-3xl font-extrabold text-gray-900">{loading ? '...' : stat.value}</p>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {loading ? (
+          <>
+            <StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard icon={Layout} label="Total Apps" value={stats?.total || 0} color="indigo" />
+            <StatCard icon={Clock} label="Pending" value={stats?.pending || 0} color="amber" />
+            <StatCard icon={CheckCircle2} label="Completed" value={stats?.completed || 0} color="emerald" />
+            <StatCard icon={TrendingUp} label="Payments" value={stats?.payments || 0} color="violet" />
+          </>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold text-gray-900">Recent Applications</h3>
-            <Link href="/dashboard/applications" className="text-indigo-600 text-sm font-bold flex items-center hover:underline">
-              View All
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </div>
+      <div className="card-premium p-8 lg:p-12">
+        <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-50">
+          <h3 className="text-2xl font-black text-gray-900 tracking-tight">Recent Applications</h3>
+          <Link href="/dashboard/applications" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center group">
+            View All Applications <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {loading ? (
           <div className="space-y-6">
-            {loading ? (
-              <div className="py-10 text-center text-gray-400 font-medium animate-pulse italic">Loading your records...</div>
-            ) : applications.length === 0 ? (
-              <div className="py-10 text-center text-gray-400 font-medium italic">No applications found.</div>
-            ) : applications.slice(0, 5).map((app) => (
-              <div key={app.ApplicationID} className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mr-4">
-                    <FileText className="h-6 w-6 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">{app.ApplicationID}</h4>
-                    <p className="text-xs text-gray-500 font-medium tracking-wide uppercase mt-0.5">{app.DSCType} • {app.PlanTier}</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold ring-1 ${
-                    app.ApplicationStatus === 'New' ? 'bg-indigo-50 text-indigo-600 ring-indigo-100' :
-                    app.ApplicationStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' :
-                    'bg-amber-50 text-amber-600 ring-amber-100'
-                  }`}>{app.ApplicationStatus}</span>
-                  <span className="text-[10px] text-gray-400 mt-2 font-medium">Updated {new Date(app.UpdatedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            ))}
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
           </div>
-        </div>
-
-        <div className="bg-indigo-600 p-8 rounded-3xl shadow-xl shadow-indigo-100 relative overflow-hidden">
-          <div className="relative z-10 h-full flex flex-col justify-between">
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-4">Complete your <br />pending documents</h3>
-              <p className="text-indigo-100 text-sm leading-relaxed mb-8 opacity-80">
-                You have 2 applications waiting for document upload. Finish now to avoid processing delays.
-              </p>
-            </div>
-            <button className="w-full bg-white text-indigo-600 py-4 rounded-2xl font-bold text-sm hover:bg-gray-50 transition-colors">
-              Continue Application
-            </button>
+        ) : applications.length === 0 ? (
+          <div className="text-center py-24 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200">
+            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-400 font-bold italic text-lg uppercase tracking-widest">No applications found.</p>
+            <Link href="/dashboard/applications/new" className="text-indigo-600 font-black mt-4 inline-block hover:underline">Start your first one &rarr;</Link>
           </div>
-          {/* Abstract circles */}
-          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2"></div>
-        </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-50">
+                  <th className="pb-4">Application ID</th>
+                  <th className="pb-4">Category</th>
+                  <th className="pb-4">Status</th>
+                  <th className="pb-4">Payment</th>
+                  <th className="pb-4 text-right">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {applications.slice(0, 5).map((app) => (
+                  <tr key={app.ApplicationID} className="group hover:bg-gray-50/50 transition-colors">
+                    <td className="py-6 font-bold text-gray-900 tracking-tight">{app.ApplicationID}</td>
+                    <td className="py-6 text-sm font-medium text-gray-600">{app.DSCType}</td>
+                    <td className="py-6">
+                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black ring-1 ring-inset ${
+                        app.ApplicationStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' :
+                        app.ApplicationStatus === 'Rejected' ? 'bg-red-50 text-red-600 ring-red-100' :
+                        'bg-amber-50 text-amber-600 ring-amber-100'
+                      }`}>
+                        {app.ApplicationStatus}
+                      </span>
+                    </td>
+                    <td className="py-6 text-sm font-bold text-gray-900">
+                      {app.PaymentStatus === 'Paid' ? '₹' + app.Price : 'Unpaid'}
+                    </td>
+                    <td className="py-6 text-right text-xs font-bold text-gray-400">
+                      {new Date(app.CreatedAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+function StatCard({ icon: Icon, label, value, color }: any) {
+  const colors: any = {
+    indigo: 'bg-indigo-50 text-indigo-600',
+    amber: 'bg-amber-50 text-amber-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
+    violet: 'bg-violet-50 text-violet-600',
+  };
+
+  return (
+    <div className="card-premium p-8 group">
+      <div className={`w-12 h-12 rounded-2xl ${colors[color]} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-sm`}>
+        <Icon className="h-6 w-6" />
+      </div>
+      <p className="text-xs font-black text-gray-400 uppercase tracking-[0.1em] mb-1">{label}</p>
+      <h4 className="text-4xl font-black text-gray-900 tracking-tighter">{value}</h4>
     </div>
   );
 }
