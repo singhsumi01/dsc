@@ -55,11 +55,22 @@ body {
   background-color: rgb(255 255 255 / 40%);
   backdrop-filter: blur(24px);
   border: 1px solid rgb(255 255 255 / 40%);
-  shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 .card-premium {
-  @apply bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-indigo-50/50 hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 overflow-hidden relative;
+  background-color: white;
+  border-radius: 2rem;
+  border: 1px solid rgb(243 244 246);
+  box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.05), 0 8px 10px -6px rgba(79, 70, 229, 0.05);
+  transition-property: all;
+  transition-duration: 500ms;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-premium:hover {
+  box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.15);
 }
 
 .hero-gradient {
