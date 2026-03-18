@@ -22,21 +22,22 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-4 lg:gap-x-8">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {['Class 3 Individual', 'Class 3 Organization', 'DGFT', 'Document Signer'].map((cat, i) => (
-              <div key={cat} className="group relative">
-                <div className="relative h-64 w-full overflow-hidden rounded-3xl bg-gray-100 sm:aspect-h-1 sm:aspect-w-2 lg:aspect-h-1 lg:aspect-w-1 group-hover:opacity-75 transition-opacity">
-                  <div className="absolute inset-0 flex items-center justify-center text-indigo-100 italic font-black text-6xl select-none">
+              <div 
+                key={cat} 
+                className="card-premium p-8 group stagger-item"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <div className="relative h-48 w-full overflow-hidden rounded-[2rem] bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-indigo-50 transition-colors">
+                  <div className="text-indigo-600/10 italic font-black text-7xl select-none group-hover:scale-110 transition-transform">
                     0{i+1}
                   </div>
                 </div>
-                <h3 className="mt-6 text-xl font-bold text-gray-900">
-                  <a href="#">
-                    <span className="absolute inset-0" />
-                    {cat}
-                  </a>
+                <h3 className="text-xl font-black text-gray-900 mb-2">
+                  {cat}
                 </h3>
-                <p className="text-sm text-gray-500">Fast processing within 24 hours.</p>
+                <p className="text-xs text-gray-500 font-medium italic">Industry-standard identity assurance.</p>
               </div>
             ))}
           </div>
